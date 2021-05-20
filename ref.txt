@@ -1,0 +1,7 @@
+Handoff management in communication- based train control networks using stream control transmission protocol and IEEE 802.11p WLANs
+-CBTC 핸드오버 소스 논문
+
+자유 공간의 Pathloss - in Decibel
+Ploss= 32.4 + 20log10d + 20log10f
+단위: 거리 미터/주파수 기가헤르츠 = 거리 킬로미터/주파수 메가헤르츠
+이 시뮬레이션에서는 단위는 미터 및 기가헤르츠를 사용할 것임.
