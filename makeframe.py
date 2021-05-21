@@ -8,6 +8,10 @@ istxing = False #현재 전송중인지 표시하는 변수. 전송중이면 Tru
 def calcduration(byte):
     return 0
 
+#def calc_eb_n0(signal, noise, bw):
+    #시그널과 노이즈는 모두 dBm 단위로 주어져야함.
+    
+
 def framecheck():
     #아직은 프레임이 제대로 도착했는지 확인할 수 있는 알고리즘을 모르기 때문에, 일단은 False로 넘김.
     #프레임 체크를 위한 변수 1. 수신전력, 2. MCS, 3. 노이즈
