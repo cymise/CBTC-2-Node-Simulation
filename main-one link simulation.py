@@ -7,9 +7,9 @@ from distance import calcdistance
 import makeframe
 import backoff
 
-frame_log = []#FER을 계산하기 위한 리스트. 매 프레임 전송이 완료된 후, 전송 성공 또는 실패를 0과 1로 저장한다.
-delay_log = []#매 epoch마다 딜레이를 저장한다.
-frame_list = {}#보낼 프레임 목록. 프레임 이름, 프레임 길이(바이트 단위)를 딕셔너리로 저장. 각 딕셔너리 간에는 백오프 과정 수행. e.g. {{"ProbeReq":100, "Ack": 50}, {"ProbeResp": 100, "Ack": 50}}
+frame_log = []#FER을 계산하기 위한 리스트. 매 프레임 전송이 완료된 후, 전송 성공 또는 실패를 0과 1로 저장한다. FER = sum(frame_log)/len(frame_log)
+delay_log = []#매 시뮬레이션이 종료된 후 소요된 딜레이를 저장한다.
+frame_list = [{"probe request":50}, {"probe response":50}, {"association request":50, "ack":50}, {"association response":50, "ack":50}]#보낼 프레임 목록. 프레임 이름, 프레임 길이(바이트 단위)를 딕셔너리로 저장. 각 딕셔너리 간에는 백오프 과정 수행. e.g. [{"ProbeReq":100, "Ack": 50}, {"ProbeResp": 100, "Ack": 50}]
 
 #---------------------------------------------------------------------------------
 #<기본 설정 - 타임스탭, 열차 이동 속도, AP 간격 및 위치, 핸드오버 지점>
@@ -41,7 +41,7 @@ f = 2.4
 #:mW, dBm 계산: http://www.rfdh.com/rfdb/dbmw.htm
 txpower = 23
 
-#목표 SNR: dB 단위
+#목표 "평균"SNR: dB 단위
 target_snr = 20
 
 #가우시안 노이즈는 다음과 같이 생성하자.
@@ -61,7 +61,7 @@ print(steps)
 distance_per_step = train_speed * timestep
 
 #핸드오버 지점. 스텝 단위로 표시.
-handover_point = int(steps / 2)
+handover_point = int(steps / 3)
 
 #2개의 AP 포인트
 ap1_point = (ap_distance * 0, ap_height)
