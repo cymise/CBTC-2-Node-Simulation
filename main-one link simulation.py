@@ -15,17 +15,17 @@ frame_list = [{"probe request":50}, {"probe response":50}, {"association request
 #<기본 설정 - 타임스탭, 열차 이동 속도, AP 간격 및 위치, 핸드오버 지점>
 #타임스텝 - 초 단위로 입력.
 #타임스텝은 시뮬레이션 시간의 기초 단위.
-timestep = 1 * math.pow(10, -6) #1마이크로세컨드 단위.
+timestep = 10 * math.pow(10, -6) #1마이크로세컨드 단위.
 #열차속도 - m/s 단위로 입력
 train_speed = 22.22 #22.2222 m/s = 80 km/h
 #AP 관련 파라미터 - m 단위로 입력
 #AP 높이는 AP의 높이에서 열차 지붕의 높이를 뺀 값으로 정함.
-ap_height = 3
+ap_height = 2
 #AP 간격은 2개의 AP가 설치된 간격을 나타냄. AP의 간격은 총 시뮬레이션의 거리를 정하게 됨.
 #총 시뮬레이션 거리 = AP간격*2. 2개의 AP는 총 시뮬레이션 거리 중앙에 입력한 간격만큼 위치.
 #아래 참고도 확인. *은 AP임. -------는 입력한 AP 간격임.
 # 참고도: *-------*------- 
-ap_distance = 200
+ap_distance = 100
 length = ap_distance * 2
 #반복 횟수
 epoch = 300
@@ -41,15 +41,17 @@ f = 2.4
 #:mW, dBm 계산: http://www.rfdh.com/rfdb/dbmw.htm
 txpower = 23
 
-#목표 "평균"SNR: dB 단위
-target_snr = 20
+#목표 "최대"SNR: dB 단위
+target_snr = 35
 
-#가우시안 노이즈는 다음과 같이 생성하자.
-#목표 SNR을 정함->평균 노이즈 파워가 dBm 단위로 나옴!->평균을 mW 단위 (또는 W 단위로 변환)->numpy 정규분포로 노이즈를 mW 단위로 만든 후, 다시 dBm 단위로 바꾸어 리스트로 만들기.
+#noise_power를 계산하기 위해서는, 다음이 필요->최저 pathloss / noise_power의 단위는 dBm 단위
+#이 noise power는 antenna gain을 고려하지 않음
+min_pathloss = pathloss(ap_height, f)
+noise_power = txpower - min_pathloss - target_snr
 
-#data_rate = 
-#coding = 
-#MCS = 
+#rx antrnna gain , dBi 단위
+rx_antenna_gain = 0
+
 #---------------------------------------------------------------------------------
 
 
@@ -78,44 +80,40 @@ ap2_distance = [calcdistance(ap2_point, train_point[i]) for i in range(steps)]
 ap1_pathloss = [pathloss(ap1_distance[i], f) for i in range(steps)]
 ap2_pathloss = [pathloss(ap2_distance[i], f) for i in range(steps)]
 
-#txpower에서 pathloss를 뺌. 이것이 (!!!노이즈가 없는!!!) 수신 전력임.
-ap1_rxpower = []
-ap2_rxpower = []
+#txpower에서 pathloss 및 노이즈 전력을 뺌. 이것이 SNR임.
+ap1_snr = []
+ap2_snr = []
 
 for i in range(steps):
-    ap1_rxpower.append(txpower - ap1_pathloss[i])
-    ap2_rxpower.append(txpower - ap2_pathloss[i])
+    ap1_snr.append(txpower - ap1_pathloss[i] + rx_antenna_gain - noise_power)
+    ap2_snr.append(txpower - ap2_pathloss[i] + rx_antenna_gain - noise_power)
 
 print("시뮬레이션 파라미터 계산 완료.")
 #---------------------------------------------------------------------------------
 
-#def awgn():
-#가우시안 노이즈를 생성해주는 함수. - 매 시뮬레이션이 끝날 때마다 가우시안 노이즈를 바꿔주는 역할도 한다.
-#이 함수가 필요한 이유는, BER과 FER을 계산하기 위해서는 채널 상태가 바뀔 필요가 있기 때문이다.
 
-def calc_ho_delay():
+#def calc_ho_delay():
     #열차가 진행중, 핸드오버 포인트를 만나면 이벤트 발생! - 이벤트 시작 시, 기존 AP와 연결이 끊어진 것으로 간주. 타임스탬프 기록
     #핸드오버 이벤트 발생 시, 다음 AP에 프레임 교환 절차 수행. 각 타임스탬프별로 노이즈가 바뀌며, 그 과정에서 프레임 에러 발생 시 오류로 간주. 재전송 시도.
     #다음 AP에 Association했다면, 타임스탬프 기록. Delay가 산출됨.
     #스텝이 끝날 때까지 Association 실패 시, Fail로 기록.
 
-    for ep in range(epoch):
-        print("시뮬레이션 {}회째 시작".format(ep+1))
-        #awgn()
-        for i in range(steps):
-            if i == handover_point:
-                
-
-    return
-
-
-#print(ap1_pathloss)
-#f1 = open("ap1pathloss.txt", "w")
-#for i in range(steps):
-#    f1.write(str(ap1_pathloss[i])+"\n")
-#f1.close()
+#    for ep in range(epoch):
+#        print("시뮬레이션 {}회째 시작".format(ep+1))
+#        #awgn()
+#        for i in range(steps):
+#            if i == handover_point:
+#                
 #
-#f2 = open("ap2pathloss.txt", "w")
-#for i in range(steps):
-#    f2.write(str(ap2_pathloss[i])+"\n")
-#f2.close()
+#    return
+
+
+f1 = open("ap1snr.txt", "w")
+for i in range(steps):
+    f1.write(str(ap1_snr[i])+"\n")
+f1.close()
+
+f2 = open("ap2snr.txt", "w")
+for i in range(steps):
+    f2.write(str(ap2_snr[i])+"\n")
+f2.close()
