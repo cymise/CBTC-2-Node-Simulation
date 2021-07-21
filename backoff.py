@@ -9,12 +9,8 @@ aDIFSTime = aSIFSTime + (2 * aSlotTime)
 cwmin = 4
 cwmax = 10
 
-iswaiting = False #initial
-endtime = 0 #initial
 
-def backoff(rtrycount, now):
-    global iswaiting
-    global endtime
+def backoff(rtrycount):
 
     if rtrycount == 0:
         cw = 2^cwmin - 1
@@ -25,33 +21,6 @@ def backoff(rtrycount, now):
         cw = 2^pow - 1
     
     bkcounter = random.randint(0, cw)
-    iswaiting = True
-    endtime = now + (bkcounter * aSlotTime)
-    return
+    return bkcounter * aSlotTime
 
-def sifs(now):
-    global iswaiting
-    global endtime
-
-    iswaiting = True
-    endtime = now + aSIFSTime
-    return
-
-def difs(now):
-    global iswaiting
-    global endtime
-
-    iswaiting = True
-    endtime = now + aDIFSTime
-    return
-
-def waiting(now):
-    global iswaiting
-    global endtime
-    
-    if endtime <= now: #아직 백오프 또는 ifs가 끝나지 않음
-        return 0
-    else:
-        iswaiting = False #대기 끝
-        return 1
 
