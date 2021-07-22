@@ -1,4 +1,4 @@
-#아래는 기본 모듈 
+#아래는 기본 모듈
 import math
 from datetime import datetime
 
@@ -15,7 +15,7 @@ aDIFSTime = aSIFSTime + (2 * aSlotTime)
 
 frame_log = []#FER을 계산하기 위한 리스트. 매 프레임 전송이 완료된 후, 전송 성공 또는 실패를 0과 1로 저장한다. FER = sum(frame_log)/len(frame_log)
 delay_log = []#매 시뮬레이션이 종료된 후 소요된 딜레이를 저장한다.
-frame_list = [{"association request":400, "ack":14}, {"association response":400, "ack":14}]#보낼 프레임 목록. 프레임 이름, 프레임 길이(바이트 단위)를 딕셔너리로 저장. 각 딕셔너리 간에는 백오프 과정 수행. e.g. [{"ProbeReq":100, "Ack": 50}, {"ProbeResp": 100, "Ack": 50}]
+frame_list = [{"probe request":400}, {"probe response":400}, {"association request":400, "ack":14}, {"association response":400, "ack":14}]#보낼 프레임 목록. 프레임 이름, 프레임 길이(바이트 단위)를 딕셔너리로 저장. 각 딕셔너리 간에는 백오프 과정 수행. e.g. [{"ProbeReq":100, "Ack": 50}, {"ProbeResp": 100, "Ack": 50}]
 num_frame_group = len(frame_list)
 
 #---------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ ap_height = 2
 ap_distance = 40
 length = ap_distance * 2
 #반복 횟수
-epoch = 2
+epoch = 10000
 #---------------------------------------------------------------------------------
 
 
@@ -76,7 +76,7 @@ print(steps)
 distance_per_step = train_speed * timestep
 
 #핸드오버 지점. 스텝 단위로 표시.
-handover_point = 0 #최대한 이른 시점에서 핸드오버 시작
+handover_point = int(steps / 3)
 
 #2개의 AP 포인트
 ap1_point = (ap_distance * 0, ap_height)
@@ -160,21 +160,23 @@ def calc_ho_delay():
                 progress += 1
     
         if failed:
-            frame_log.append(3)
-            delay_log.append(step)
-            print("핸드오버 시점은", step - initial_step, "스텝 입니다.")
+            frame_log.append(0)
+            delay_log.append(step - initial_step)
+            print("딜레이는", step - initial_step, "스텝 입니다.")
             print("프레임 시퀀스 실패")
         else:
-            frame_log.append(3)
-            delay_log.append(step)
-            print("핸드오버 시점은", step, "스텝 입니다.")
+            frame_log.append(1)
+            delay_log.append(step - initial_step)
+            print("딜레이는", step - initial_step, "스텝 입니다.")
             print("프레임 시퀀스 성공")
 
 
     print(frame_log)
     print(delay_log)
-    filename = "./save/"+"SC2-HO_"+datetime.today().strftime("%d_%H_%M") + ".txt"
+    filename = "./save/"+"SC1_"+datetime.today().strftime("%d_%H_%M") + ".txt"
     ReadEngine.Write_List_To_Text(filename, frame_log, delay_log)
+
+    
 
 
 
