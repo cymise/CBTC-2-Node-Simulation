@@ -3,9 +3,10 @@ import math
 from datetime import datetime
 
 #아래는 시뮬레이터 자체 모듈.
-#PATHLOSS 모델을 바꿀 때에는, 아래의 두 파라미터를 모두 바꿀 것!
+#PATHLOSS 모델을 바꿀 때에는, 아래의 세 파라미터를 모두 바꿀 것!
 from pathloss import fspl
 pathloss = fspl
+pathloss_marker = fspl
 from distance import calcdistance
 import txframe
 import backoff
@@ -164,7 +165,7 @@ def calc_ho_delay():
 
     print(frame_log)
     print(boundary_log)
-    filename = "./save/"+"SC2-Boundary_"+datetime.today().strftime("%d_%H_%M") + ".txt"
+    filename = "./save/"+"SC2-Boundary_"+pathloss_marker+datetime.today().strftime("%d_%H_%M") + ".txt"
     ReadEngine.Write_List_To_Text(filename, frame_log, boundary_log)
 
 
