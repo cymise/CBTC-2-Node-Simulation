@@ -6,7 +6,7 @@ from datetime import datetime
 #PATHLOSS 모델을 바꿀 때에는, 아래의 세 파라미터를 모두 바꿀 것!
 from pathloss import fspl
 pathloss = fspl
-pathloss_marker = fspl
+pathloss_marker = "fspl"
 from distance import calcdistance
 import txframe
 import backoff

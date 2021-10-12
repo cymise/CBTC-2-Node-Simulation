@@ -4,7 +4,8 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 
 #아래는 시뮬레이터 자체 모듈.
-from pathloss import pathloss
+from pathloss import fspl
+pathloss = fspl
 from distance import calcdistance
 
 #---------------------------------------------------------------------------------
