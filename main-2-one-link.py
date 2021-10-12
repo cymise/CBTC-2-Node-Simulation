@@ -3,7 +3,9 @@ import math
 from datetime import datetime
 
 #아래는 시뮬레이터 자체 모듈.
-from pathloss import pathloss
+#PATHLOSS 모델을 바꿀 때에는, 아래의 두 파라미터를 모두 바꿀 것!
+from pathloss import fspl
+pathloss = fspl
 from distance import calcdistance
 import txframe
 import backoff
@@ -15,7 +17,7 @@ aDIFSTime = aSIFSTime + (2 * aSlotTime)
 
 frame_log = []#FER을 계산하기 위한 리스트. 매 프레임 전송이 완료된 후, 전송 성공 또는 실패를 0과 1로 저장한다. FER = sum(frame_log)/len(frame_log)
 delay_log = []#매 시뮬레이션이 종료된 후 소요된 딜레이를 저장한다.
-frame_list = [{"association request":400, "ack":14}, {"association response":400, "ack":14}]#보낼 프레임 목록. 프레임 이름, 프레임 길이(바이트 단위)를 딕셔너리로 저장. 각 딕셔너리 간에는 백오프 과정 수행. e.g. [{"ProbeReq":100, "Ack": 50}, {"ProbeResp": 100, "Ack": 50}]
+frame_list = [{"authentication request":400, "ack":14}, {"authentication response":400, "ack":14}, {"association request":400, "ack":14}, {"association response":400, "ack":14}]#보낼 프레임 목록. 프레임 이름, 프레임 길이(바이트 단위)를 딕셔너리로 저장. 각 딕셔너리 간에는 백오프 과정 수행. e.g. [{"ProbeReq":100, "Ack": 50}, {"ProbeResp": 100, "Ack": 50}]
 num_frame_group = len(frame_list)
 
 #---------------------------------------------------------------------------------
