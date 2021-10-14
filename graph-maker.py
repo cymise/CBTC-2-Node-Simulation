@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 #아래는 시뮬레이터 자체 모듈.
 from pathloss import fspl
 pathloss = fspl
+pathloss_marker = "fspl"
+load_snr = False
 from distance import calcdistance
 
 #---------------------------------------------------------------------------------
@@ -79,34 +81,54 @@ train_point_x = [x * distance_per_step for x in range(steps)]
 ap1_distance = [calcdistance(ap1_point, train_point[i]) for i in range(steps)]
 ap2_distance = [calcdistance(ap2_point, train_point[i]) for i in range(steps)]
 
-#각 스텝당 pathloss 계산
-ap1_pathloss = [pathloss(ap1_distance[i], f) for i in range(steps)]
-ap2_pathloss = [pathloss(ap2_distance[i], f) for i in range(steps)]
+if load_snr == False:
+    #각 스텝당 pathloss 계산
+    ap1_pathloss = [pathloss(ap1_distance[i], f) for i in range(steps)]
+    ap2_pathloss = [pathloss(ap2_distance[i], f) for i in range(steps)]
 
-#txpower에서 pathloss 및 노이즈 전력을 뺌. 이것이 SNR임.
-ap1_snr = []
-ap2_snr = []
+    #txpower에서 pathloss 및 노이즈 전력을 뺌. 이것이 SNR임.
+    ap1_snr = []
+    ap2_snr = []
 
-for i in range(steps):
-    ap1_snr.append(txpower - ap1_pathloss[i] + rx_antenna_gain - noise_power)
-    ap2_snr.append(txpower - ap2_pathloss[i] + rx_antenna_gain - noise_power)
+    for i in range(steps):
+        ap1_snr.append(txpower - ap1_pathloss[i] + rx_antenna_gain - noise_power)
+        ap2_snr.append(txpower - ap2_pathloss[i] + rx_antenna_gain - noise_power)
 
-print("시뮬레이션 파라미터 계산 완료.")
+    print("시뮬레이션 파라미터 계산 완료.")
+
+else:
+    ap1_snr_name = "ap1_"+pathloss_marker+"_snr.txt"
+    ap2_snr_name = "ap2_"+pathloss_marker+"_snr.txt"
+    f1 = open(ap1_snr_name, "r")
+    snr1 = f1.read()
+    snr1 = snr1.split("\n")
+    snr1.pop()
+    ap1_snr = [float(i) for i in snr1]
+    f1.close()
+
+    f2 = open(ap2_snr_name, "r")
+    snr2 = f2.read()
+    snr2 = snr2.split("\n")
+    snr2.pop()
+    ap2_snr = [float(i) for i in snr2]
+    f2.close()
+
+    print("시뮬레이션 파라미터 로드 완료.")
 #---------------------------------------------------------------------------------
 
 plt.plot(train_point_x, ap1_snr, label = "AP 1 SNR from train", linestyle = "solid", color = "black")
 plt.plot(train_point_x, ap2_snr, label = "AP 2 SNR from train", linestyle = "dashdot", color = "black")
-plt.title("SNR graph of simulation environment")
+plt.title("SNR graph of simulation environment\nFree Space Pathloss")
 plt.xlabel("Distance of train from simulation origin")
 plt.ylabel("SNR (dB)")
 plt.legend()
 plt.axis([0, 80, 0, 35])
 plt.grid()
 #plt.show()
-plt.savefig('./graph/fig_snr.png', dpi=300)
+plt.savefig('./graph/fig_snr_fspl.png', dpi=300)
 
 bar_x = ["Current system", "Proposed system"]
-delay = [5780.3533, 7.7247] #기존 - 제안 순서대로
+delay = [10175.0, 81.1] #기존 - 제안 순서대로
 plt.figure()
 plt.bar(bar_x, delay, color = ["k", "k"], width=0.4)
 plt.title("Simulated average delay comparison")
@@ -120,9 +142,9 @@ for i, v in enumerate(bar_x):
              horizontalalignment='center',  # horizontalalignment (left, center, right)
              verticalalignment='bottom')    # verticalalignment (top, center, bottom)
 
-plt.savefig('./graph/fig_delay.png', dpi=300)
+plt.savefig('./graph/fig_delay_fspl.png', dpi=300)
 
-plt.show()
+#plt.show()
 
 
 def convert_to_step(time): #마이크로세컨드 단위 시간을 받아 스텝으로 변환

@@ -1,12 +1,16 @@
 #아래는 기본 모듈 
 import math
+import sys
 from datetime import datetime
 
 #아래는 시뮬레이터 자체 모듈.
 #PATHLOSS 모델을 바꿀 때에는, 아래의 세 파라미터를 모두 바꿀 것!
-from pathloss import fspl
-pathloss = fspl
-pathloss_marker = "fspl"
+from pathloss import fspl, ldpl, ldpl_t, tcpl
+pathloss = ldpl_t
+pathloss_marker = "ldpl_t"
+load_snr = True
+save_snr = False
+
 from distance import calcdistance
 import txframe
 import backoff
@@ -92,20 +96,39 @@ train_point = [(x * distance_per_step, 0) for x in range(steps)]
 ap1_distance = [calcdistance(ap1_point, train_point[i]) for i in range(steps)]
 ap2_distance = [calcdistance(ap2_point, train_point[i]) for i in range(steps)]
 
+if load_snr == False:
+    #각 스텝당 pathloss 계산
+    ap1_pathloss = [pathloss(ap1_distance[i], f) for i in range(steps)]
+    ap2_pathloss = [pathloss(ap2_distance[i], f) for i in range(steps)]
 
-#각 스텝당 pathloss 계산
-ap1_pathloss = [pathloss(ap1_distance[i], f) for i in range(steps)]
-ap2_pathloss = [pathloss(ap2_distance[i], f) for i in range(steps)]
+    #txpower에서 pathloss 및 노이즈 전력을 뺌. 이것이 SNR임.
+    ap1_snr = []
+    ap2_snr = []
 
-#txpower에서 pathloss 및 노이즈 전력을 뺌. 이것이 SNR임.
-ap1_snr = []
-ap2_snr = []
+    for i in range(steps):
+        ap1_snr.append(txpower - ap1_pathloss[i] + rx_antenna_gain - noise_power)
+        ap2_snr.append(txpower - ap2_pathloss[i] + rx_antenna_gain - noise_power)
 
-for i in range(steps):
-    ap1_snr.append(txpower - ap1_pathloss[i] + rx_antenna_gain - noise_power)
-    ap2_snr.append(txpower - ap2_pathloss[i] + rx_antenna_gain - noise_power)
+    print("시뮬레이션 파라미터 계산 완료.")
 
-print("시뮬레이션 파라미터 계산 완료.")
+else:
+    ap1_snr_name = "ap1_"+pathloss_marker+"_snr.txt"
+    ap2_snr_name = "ap2_"+pathloss_marker+"_snr.txt"
+    f1 = open(ap1_snr_name, "r")
+    snr1 = f1.read()
+    snr1 = snr1.split("\n")
+    snr1.pop()
+    ap1_snr = [float(i) for i in snr1]
+    f1.close()
+
+    f2 = open(ap2_snr_name, "r")
+    snr2 = f2.read()
+    snr2 = snr2.split("\n")
+    snr2.pop()
+    ap2_snr = [float(i) for i in snr2]
+    f2.close()
+
+    print("시뮬레이션 파라미터 로드 완료.")
 #---------------------------------------------------------------------------------
 
 def convert_to_step(time): #마이크로세컨드 단위 시간을 받아 스텝으로 변환
@@ -120,7 +143,7 @@ def calc_ho_delay():
     initial_step = 0
 
     for ep in range(epoch):
-        print("시뮬레이션 {}회 시작".format(ep+1))
+        printProgress(ep+1, epoch, 'Progress:', 'Complete', 1, 50)
         step = initial_step
         last_transmit = initial_step
         boundary = False
@@ -129,30 +152,30 @@ def calc_ho_delay():
             rtrycount = 0
 
             while(1): #프레임 그룹의 프레임 전송
-                print("현재 재전송 카운트: ", rtrycount)
+                #print("현재 재전송 카운트: ", rtrycount)
                 step += convert_to_step(backoff.backoff(rtrycount))
 
                 for frame in frame_group:
-                    print(frame, "전송중", "    프레임 길이: ", frame_group[frame],"  현재 스텝: ", step, "/", steps)
+                    #print(frame, "전송중", "    프레임 길이: ", frame_group[frame],"  현재 스텝: ", step, "/", steps)
                     if step >= steps: #시뮬레이션 시간을 초과할 경우
                         boundary = True
-                        print("스텝 경계 도달")
+                        #print("스텝 경계 도달")
                         break
 
                     result, time, per = txframe.txframe(frame_group[frame], MCS, ap1_snr[step])
-                    print("PER: ", per, "SNR: ", ap1_snr[step])
+                    #print("PER: ", per, "SNR: ", ap1_snr[step])
                     step += convert_to_step(time)
 
                     #프레임 전송에 성공시 프레임 그룹 내의 다음 프레임 전송
                     if result == False: # 프레임 전송에 실패하면
-                        print("프레임 전송 실패. 재전송")
+                        #print("프레임 전송 실패. 재전송")
                         rtrycount +=1 #재전송 카운트 증가
                         break
                     elif result == True:
                         last_transmit = step
 
                 if boundary == True:
-                    print("스텝 경계에 도달함. while을 빠져나옴.")
+                    #print("스텝 경계에 도달함. while을 빠져나옴.")
                     break
             
             if boundary:
@@ -161,23 +184,37 @@ def calc_ho_delay():
         if boundary:
             frame_log.append(2)
             boundary_log.append(last_transmit)
-            print("마지막으로 성공한 프레임 전송 시점은", last_transmit, "스텝 입니다.")
+            #print("마지막으로 성공한 프레임 전송 시점은", last_transmit, "스텝 입니다.")
 
-    print(frame_log)
+    #print(frame_log)
     print(boundary_log)
     filename = "./save/"+"SC2-Boundary_"+pathloss_marker+datetime.today().strftime("%d_%H_%M") + ".txt"
     ReadEngine.Write_List_To_Text(filename, frame_log, boundary_log)
 
+def printProgress (iteration, total, prefix = '', suffix = '', decimals = 1, barLength = 100):
+    formatStr = "{0:." + str(decimals) + "f}"
+    percent = formatStr.format(100 * (iteration / float(total)))
+    filledLength = int(round(barLength * iteration / float(total)))
+    bar = '#' * filledLength + '-' * (barLength - filledLength)
+    sys.stdout.write('\r%s |%s| %s%s %s' % (prefix, bar, percent, '%', suffix)),
+    if iteration == total:
+        sys.stdout.write('\n')
+    sys.stdout.flush()
 
 
-#f1 = open("ap1snr.txt", "w")
-#for i in range(steps):
-#    f1.write(str(ap1_snr[i])+"\n")
-#f1.close()
 
-#f2 = open("ap2snr.txt", "w")
-#for i in range(steps):
-#    f2.write(str(ap2_snr[i])+"\n")
-#f2.close()
+if save_snr == True:
+    ap1_snr_name = "ap1_"+pathloss_marker+"_snr.txt"
+    ap2_snr_name = "ap2_"+pathloss_marker+"_snr.txt"
+    f1 = open(ap1_snr_name, "w")
+    for i in range(steps):
+        f1.write(str(ap1_snr[i])+"\n")
+    f1.close()
+
+    f2 = open(ap2_snr_name, "w")
+    for i in range(steps):
+        f2.write(str(ap2_snr[i])+"\n")
+    f2.close()
+
 
 calc_ho_delay()
