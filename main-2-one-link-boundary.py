@@ -61,7 +61,7 @@ target_snr = 30
 
 #noise_power를 계산하기 위해서는, 다음이 필요->최저 pathloss / noise_power의 단위는 dBm 단위
 #이 noise power는 antenna gain을 고려하지 않음
-min_pathloss = pathloss(ap_height, f)
+min_pathloss = fspl(ap_height, f)
 noise_power = txpower - min_pathloss - target_snr
 
 #rx antrnna gain , dBi 단위
@@ -75,7 +75,7 @@ MCS = 1
 
 
 #---------------------------------------------------------------------------------
-#<시뮬레이션 파라미터 - 수동 입력 필요 없음.>
+#<시뮬레이션 파라미터>
 #스텝: 총 타임스텝의 수. - 정수형으로 변환. / distance_per_step: 한 타임스텝당 거리.
 
 steps = int((length / train_speed)/timestep)
@@ -129,6 +129,9 @@ else:
     f2.close()
 
     print("시뮬레이션 파라미터 로드 완료.")
+
+#!!!!!수동 입력 필요!!!!!
+txframe.ap_snr = ap1_snr #이 시뮬레이션은 AP1을 위한 시뮬레이션이므로.
 #---------------------------------------------------------------------------------
 
 def convert_to_step(time): #마이크로세컨드 단위 시간을 받아 스텝으로 변환
@@ -140,7 +143,7 @@ def calc_ho_delay():
     #핸드오버 이벤트 발생 시, 다음 AP에 프레임 교환 절차 수행. 각 타임스탬프별로 노이즈가 바뀌며, 그 과정에서 프레임 에러 발생 시 오류로 간주. 재전송 시도.
     #다음 AP에 Association했다면, 타임스탬프 기록. Delay가 산출됨.
     #스텝이 끝날 때까지 Association 실패 시, Fail로 기록.
-    initial_step = 0
+    initial_step = 600000
 
     for ep in range(epoch):
         printProgress(ep+1, epoch, 'Progress:', 'Complete', 1, 50)
@@ -162,9 +165,10 @@ def calc_ho_delay():
                         #print("스텝 경계 도달")
                         break
 
-                    result, time, per = txframe.txframe(frame_group[frame], MCS, ap1_snr[step])
+                    #result, time, per = txframe.txframe(frame_group[frame], MCS, ap1_snr[step])
+                    result, tx_step, per = txframe.txframe(frame_group[frame], MCS, step)
                     #print("PER: ", per, "SNR: ", ap1_snr[step])
-                    step += convert_to_step(time)
+                    step += tx_step
 
                     #프레임 전송에 성공시 프레임 그룹 내의 다음 프레임 전송
                     if result == False: # 프레임 전송에 실패하면

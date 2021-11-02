@@ -62,7 +62,7 @@ target_snr = 30
 
 #noise_power를 계산하기 위해서는, 다음이 필요->최저 pathloss / noise_power의 단위는 dBm 단위
 #이 noise power는 antenna gain을 고려하지 않음
-min_pathloss = pathloss(ap_height, f)
+min_pathloss = fspl(ap_height, f)
 noise_power = txpower - min_pathloss - target_snr
 
 #rx antrnna gain , dBi 단위
@@ -76,7 +76,7 @@ MCS = 1
 
 
 #---------------------------------------------------------------------------------
-#<시뮬레이션 파라미터 - 수동 입력 필요 없음.>
+#<시뮬레이션 파라미터>
 #스텝: 총 타임스텝의 수. - 정수형으로 변환. / distance_per_step: 한 타임스텝당 거리.
 
 steps = int((length / train_speed)/timestep)
@@ -130,6 +130,9 @@ else:
     f2.close()
 
     print("시뮬레이션 파라미터 로드 완료.")
+
+#!!!!!수동 입력 필요!!!!!
+txframe.ap_snr = ap2_snr #이 시뮬레이션은 AP2를 위한 시뮬레이션이므로.
 #---------------------------------------------------------------------------------
 
 def convert_to_step(time): #마이크로세컨드 단위 시간을 받아 스텝으로 변환
@@ -165,9 +168,10 @@ def calc_ho_delay():
                         print("프레임 시퀀스 실패")
                         break
 
-                    result, time, per = txframe.txframe(frame_group[frame], MCS, ap2_snr[step])
+                    #result, time, per = txframe.txframe(frame_group[frame], MCS, ap2_snr[step])
+                    result, tx_step, per = txframe.txframe(frame_group[frame], MCS, step)
                     #print("PER: ", per, "SNR: ", ap2_snr[step])
-                    step += convert_to_step(time)
+                    step += tx_step
 
                     #프레임 전송에 성공시 프레임 그룹 내의 다음 프레임 전송
                     if result == False: # 프레임 전송에 실패하면

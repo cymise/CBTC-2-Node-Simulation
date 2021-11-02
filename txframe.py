@@ -15,13 +15,26 @@ PRE_HE_LTF = 4 * STREAM # HE-LTF, 마이크로세컨드 단위. 공간스트림�
 per_list_dir = "./snr-per/"
 per_list = ["0-400", "0-14", "0-1000","1-400", "1-14", "1-1000"] #mcs-bytes
 per_table = {}
+ap_snr = []
+timestep_mantissa = 1
+timestep = timestep_mantissa * math.pow(10, -6)
 
 
-def txframe(bytes, mcs, snr): #now 외에 채널을 확인할 수 있는 정보가 들어가야함!
+def txframe(bytes, mcs, step): #now 외에 채널을 확인할 수 있는 정보가 들어가야함!
     time = calcduration(bytes, mcs)
+    tx_step = convert_to_step(time)
+    snr = 0
+
+    try:
+        for i in range(step, step + tx_step):
+            snr = snr + ap_snr[i]
+        snr = snr/tx_step #전송 기간동안 SNR의 평균을 구함
+    except:
+        snr = ap_snr[step]
+    
     per = snr_to_per(bytes, mcs, snr)
     result = random.choices((True, False), weights = (1 - per, per))[0]
-    return result, time, per
+    return result, tx_step, per
     #randaa = random.choices((True, False), weights = (1, 1))[0]
     #return randaa, 400, 0.5
 
@@ -104,6 +117,10 @@ def load_per_table():
         file_dir = per_list_dir + file_name + ".txt"
         tempdiction = ReadEngine.Read_To_Diction(file_dir)
         per_table[file_name] = tempdiction
+
+def convert_to_step(time): #마이크로세컨드 단위 시간을 받아 스텝으로 변환
+    in_step = math.ceil(time / timestep_mantissa)
+    return in_step
 
 load_per_table()
 

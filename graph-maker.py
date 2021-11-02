@@ -115,7 +115,7 @@ else:
 
     print("시뮬레이션 파라미터 로드 완료.")
 #---------------------------------------------------------------------------------
-
+'''
 plt.plot(train_point_x, ap1_snr, label = "AP 1 SNR from train", linestyle = "solid", color = "black")
 plt.plot(train_point_x, ap2_snr, label = "AP 2 SNR from train", linestyle = "dashdot", color = "black")
 plt.title("SNR graph of simulation environment\nFree Space Pathloss")
@@ -126,13 +126,14 @@ plt.axis([0, 80, 0, 35])
 plt.grid()
 #plt.show()
 plt.savefig('./graph/fig_snr_fspl.png', dpi=300)
+'''
 
-bar_x = ["Current system", "Proposed system"]
-delay = [10175.0, 81.1] #기존 - 제안 순서대로
+bar_x = ["Previous system", "Proposed system"]
+delay = [10175, 81.1] #기존 - 제안 순서대로
 plt.figure()
 plt.bar(bar_x, delay, color = ["k", "k"], width=0.4)
 plt.title("Simulated average delay comparison")
-plt.xlabel("Simulated system")
+#plt.xlabel("Simulated system")
 plt.ylabel("Delay (µs)")
 
 for i, v in enumerate(bar_x):
