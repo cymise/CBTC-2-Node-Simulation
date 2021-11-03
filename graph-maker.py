@@ -131,7 +131,7 @@ plt.savefig('./graph/fig_snr_fspl.png', dpi=300)
 bar_x = ["Previous system", "Proposed system"]
 delay = [10175, 81.1] #기존 - 제안 순서대로
 plt.figure()
-plt.bar(bar_x, delay, color = ["k", "k"], width=0.4)
+plt.bar(bar_x, delay, color = ["k", "k"], width=0.2)
 plt.title("Simulated average delay comparison")
 #plt.xlabel("Simulated system")
 plt.ylabel("Delay (µs)")
