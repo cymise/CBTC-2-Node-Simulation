@@ -8,7 +8,7 @@ from datetime import datetime
 from pathloss import fspl, ldpl, ldpl_t, tcpl
 pathloss = ldpl_t
 pathloss_marker = "ldpl_t"
-load_snr = True
+load_snr = False
 save_snr = False
 
 from distance import calcdistance
@@ -68,7 +68,7 @@ noise_power = txpower - min_pathloss - target_snr
 rx_antenna_gain = 0
 
 #MCS 인덱스 -> Duration 계산에 사용
-MCS = 1
+MCS = 2
 #나머지 채널 파라미터들은 txframe에서 수정해야함.
 #GI, SYMBOLTIME, STREAM, SUBCARRIERS 등
 #---------------------------------------------------------------------------------

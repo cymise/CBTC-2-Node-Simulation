@@ -9,7 +9,7 @@ pathloss = fspl
 pathloss_marker = "fspl"
 load_snr = False
 from distance import calcdistance
-
+'''
 #---------------------------------------------------------------------------------
 #<물리적 위치 및 시간 설정 - 타임스탭, 열차 이동 속도, AP 간격 및 위치, 핸드오버 지점>
 #타임스텝 - 초 단위로 입력.
@@ -114,6 +114,8 @@ else:
     f2.close()
 
     print("시뮬레이션 파라미터 로드 완료.")
+
+'''
 #---------------------------------------------------------------------------------
 '''
 plt.plot(train_point_x, ap1_snr, label = "AP 1 SNR from train", linestyle = "solid", color = "black")
@@ -129,8 +131,9 @@ plt.savefig('./graph/fig_snr_fspl.png', dpi=300)
 '''
 
 bar_x = ["Previous system", "Proposed system"]
-delay = [10175, 81.1] #기존 - 제안 순서대로
+delay = [5269, 0] #기존 - 제안 순서대로
 plt.figure()
+plt.yscale("log")
 plt.bar(bar_x, delay, color = ["k", "k"], width=0.2)
 plt.title("Simulated average delay comparison")
 #plt.xlabel("Simulated system")
@@ -143,7 +146,7 @@ for i, v in enumerate(bar_x):
              horizontalalignment='center',  # horizontalalignment (left, center, right)
              verticalalignment='bottom')    # verticalalignment (top, center, bottom)
 
-plt.savefig('./graph/fig_delay_fspl.png', dpi=300)
+plt.savefig('./graph/fig_delay_ldpl_t.png', dpi=300)
 
 #plt.show()
 
