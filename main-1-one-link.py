@@ -6,8 +6,8 @@ from datetime import datetime
 #아래는 시뮬레이터 자체 모듈.
 #PATHLOSS 모델을 바꿀 때에는, 아래의 세 파라미터를 모두 바꿀 것!
 from pathloss import fspl, ldpl, ldpl_t, tcpl
-pathloss = ldpl_t
-pathloss_marker = "ldpl_t"
+pathloss = fspl
+pathloss_marker = "fspl"
 load_snr = False
 save_snr = False
 
@@ -58,7 +58,7 @@ f = 5.25
 txpower = 23
 
 #목표 "최대"SNR: dB 단위
-target_snr = 30
+target_snr = 35
 
 #noise_power를 계산하기 위해서는, 다음이 필요->최저 pathloss / noise_power의 단위는 dBm 단위
 #이 noise power는 antenna gain을 고려하지 않음
@@ -69,7 +69,7 @@ noise_power = txpower - min_pathloss - target_snr
 rx_antenna_gain = 0
 
 #MCS 인덱스 -> Duration 계산에 사용
-MCS = 2
+MCS = 0
 #나머지 채널 파라미터들은 txframe에서 수정해야함.
 #GI, SYMBOLTIME, STREAM, SUBCARRIERS 등
 #---------------------------------------------------------------------------------
