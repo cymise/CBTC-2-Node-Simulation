@@ -57,7 +57,7 @@ f = 5.25
 txpower = 23
 
 #목표 "최대"SNR: dB 단위
-target_snr = 35
+target_snr = 30
 
 #noise_power를 계산하기 위해서는, 다음이 필요->최저 pathloss / noise_power의 단위는 dBm 단위
 #이 noise power는 antenna gain을 고려하지 않음
