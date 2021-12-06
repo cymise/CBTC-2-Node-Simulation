@@ -68,7 +68,7 @@ noise_power = txpower - min_pathloss - target_snr
 rx_antenna_gain = 0
 
 #MCS 인덱스 -> Duration 계산에 사용
-MCS = 2
+MCS = 4
 #나머지 채널 파라미터들은 txframe에서 수정해야함.
 #GI, SYMBOLTIME, STREAM, SUBCARRIERS 등
 #---------------------------------------------------------------------------------
