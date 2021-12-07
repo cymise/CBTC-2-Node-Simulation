@@ -6,8 +6,8 @@ from datetime import datetime
 #아래는 시뮬레이터 자체 모듈.
 #PATHLOSS 모델을 바꿀 때에는, 아래의 세 파라미터를 모두 바꿀 것!
 from pathloss import fspl, ldpl, ldpl_t, tcpl
-pathloss = fspl
-pathloss_marker = "fspl"
+pathloss = ldpl_t
+pathloss_marker = "ldpl_t"
 load_snr = False
 save_snr = False
 
